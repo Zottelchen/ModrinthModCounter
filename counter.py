@@ -1,10 +1,11 @@
 import os
-import sys
+import time
 
 import pandas as pd
 import requests
 import requests_cache
 import seaborn as sns
+from ratelimit import limits, sleep_and_retry
 
 LOADERS = ["fabric", "rift", "ornithe", "neoforge", "modloader", "forge", "quilt", "babric", "bta-babric", "java-agent", "legacy-fabric", "liteloader", "nilloader"]
 VERSIONS = [
@@ -111,13 +112,26 @@ requests_cache.install_cache("api_cache", expire_after=3600 * 23)  # Cache expir
 cm = sns.light_palette("green", as_cmap=True)
 
 
+@sleep_and_retry
+@limits(calls=250, period=60)
+def ratelimited_get(*args, **kwargs):
+    response = requests.get(*args, **kwargs)
+    if response.status_code == 429:
+        reset_time = int(response.headers.get("X-RateLimit-Reset", 1))
+        wait_time = max(reset_time - int(time.time()), 1)
+        print(f"Rate limit exceeded. Waiting for {wait_time} seconds...")
+        time.sleep(wait_time)
+        response = requests.get(*args, **kwargs)
+    return response
+
+
 def fetch_modrinth_mods(version="1.21.10", category="fabric", limit=1) -> int:
     url = "https://api.modrinth.com/v2/search"
     facets = f'[["project_type:mod"],["versions:{version}"],["categories:{category}"]]'
     params = {"limit": limit, "index": "relevance", "facets": facets}
     print(f"Fetching mods for version {version} and category {category}...")
 
-    response = requests.get(url, params=params)
+    response = ratelimited_get(url, params=params)
     response.raise_for_status()  # Raise an error for bad responses
     data = response.json()
 
@@ -132,11 +146,12 @@ def fetch_modrinth_total_versions(version="1.21.10", limit=1) -> int:
     params = {"limit": limit, "index": "relevance", "facets": facets}
     print(f"Fetching total versions for {version}...")
 
-    response = requests.get(url, params=params)
+    response = ratelimited_get(url, params=params)
     response.raise_for_status()  # Raise an error for bad responses
     data = response.json()
 
     return data.get("total_hits", 0)
+
 
 def fetch_modrinth_total_loaders(loader="fabric", limit=1) -> int:
     url = "https://api.modrinth.com/v2/search"
@@ -145,11 +160,12 @@ def fetch_modrinth_total_loaders(loader="fabric", limit=1) -> int:
     params = {"limit": limit, "index": "relevance", "facets": facets}
     print(f"Fetching total loaders for {loader}...")
 
-    response = requests.get(url, params=params)
+    response = ratelimited_get(url, params=params)
     response.raise_for_status()  # Raise an error for bad responses
     data = response.json()
 
     return data.get("total_hits", 0)
+
 
 if __name__ == "__main__":
     columns = ["Version"]

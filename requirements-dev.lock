@@ -54,6 +54,7 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2025.2
     # via pandas
+ratelimit==2.2.1
 requests==2.32.5
     # via requests-cache
 requests-cache==1.2.1
