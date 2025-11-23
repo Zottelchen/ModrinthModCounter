@@ -1,0 +1,22 @@
+[project]
+name = "modrinthmodcounter"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Zottelchen", email = "git@zottelchen.com" }
+]
+dependencies = [
+    "requests>=2.32.5",
+    "pandas>=2.3.3",
+    "requests-cache>=1.2.1",
+    "jinja2>=3.1.6",
+    "seaborn>=0.13.2",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+classifiers = ["Private :: Do Not Upload"]
+
+[tool.rye]
+managed = true
+virtual = true
+dev-dependencies = []
