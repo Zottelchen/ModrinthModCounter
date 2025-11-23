@@ -106,7 +106,7 @@ VERSIONS = [
     "1.0",
 ]
 
-requests_cache.install_cache("api_cache", expire_after=3600)
+requests_cache.install_cache("api_cache", expire_after=3600*23)  # Cache expires after 23 hours
 cm = sns.light_palette("green", as_cmap=True)
 
 
@@ -155,6 +155,6 @@ if __name__ == "__main__":
         output_content = template_content.replace("<!--REPLACE_CONTENT-->", styled.to_html())
         from datetime import datetime
 
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
         output_content = output_content.replace("<!--REPLACE_TIME-->", current_time)
         output_file.write(output_content)

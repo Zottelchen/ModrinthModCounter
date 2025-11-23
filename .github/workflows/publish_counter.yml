@@ -33,7 +33,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Enable caching and define a custom cache key prefix
+      - name: Cache Modrinth API responses
+        uses: actions/cache@v4
+        with:
+          path: |
+            api_cache.sqlite
+          key: api-${{ runner.os }}-${{ hashFiles('**/counter.py') }}
+          restore-keys: |
+            api-${{ runner.os }}-
+      - name: Setup Rye
         id: setup-rye
         uses: eifinger/setup-rye@v4
         with:
