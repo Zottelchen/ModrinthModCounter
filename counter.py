@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pandas as pd
 import requests
@@ -106,7 +107,7 @@ VERSIONS = [
     "1.0",
 ]
 
-requests_cache.install_cache("api_cache", expire_after=3600*23)  # Cache expires after 23 hours
+requests_cache.install_cache("api_cache", expire_after=3600 * 23)  # Cache expires after 23 hours
 cm = sns.light_palette("green", as_cmap=True)
 
 
@@ -123,18 +124,49 @@ def fetch_modrinth_mods(version="1.21.10", category="fabric", limit=1) -> int:
     return data.get("total_hits", 0)
 
 
+def fetch_modrinth_total_versions(version="1.21.10", limit=1) -> int:
+    # https://api.modrinth.com/v2/search?limit=20&index=relevance&facets=%5B%5B%22project_type%3Amod%22%5D%2C%5B%22versions%3A1.21.10%22%5D%2C%5B%22categories%3Aforge%22%2C%22categories%3Arift%22%2C%22categories%3Aornithe%22%2C%22categories%3Aneoforge%22%2C%22categories%3Aquilt%22%2C%22categories%3Ababric%22%2C%22categories%3Abta-babric%22%2C%22categories%3Ajava-agent%22%2C%22categories%3Alegacy-fabric%22%2C%22categories%3Aliteloader%22%2C%22categories%3Amodloader%22%2C%22categories%3Anilloader%22%2C%22categories%3Afabric%22%5D%5D
+    url = "https://api.modrinth.com/v2/search"
+    categories = ",".join([f'"categories:{loader}"' for loader in LOADERS])
+    facets = f'[["project_type:mod"],["versions:{version}"],[{categories}]]'
+    params = {"limit": limit, "index": "relevance", "facets": facets}
+    print(f"Fetching total versions for {version}...")
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()  # Raise an error for bad responses
+    data = response.json()
+
+    return data.get("total_hits", 0)
+
+def fetch_modrinth_total_loaders(loader="fabric", limit=1) -> int:
+    url = "https://api.modrinth.com/v2/search"
+    versions = ",".join([f'"versions:{version}"' for version in VERSIONS])
+    facets = f'[["project_type:mod"],[{versions}],["categories:{loader}"]]'
+    params = {"limit": limit, "index": "relevance", "facets": facets}
+    print(f"Fetching total loaders for {loader}...")
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()  # Raise an error for bad responses
+    data = response.json()
+
+    return data.get("total_hits", 0)
+
 if __name__ == "__main__":
     columns = ["Version"]
-    columns = columns.extend(LOADERS)
+    columns.extend(LOADERS)
+    columns.extend(["Version Total"])
     df = pd.DataFrame(columns=columns)
 
     for version in VERSIONS:
         for loader in LOADERS:
             total_mods = fetch_modrinth_mods(version=version, category=loader)
             df.at[version, loader] = total_mods
+        total_version = fetch_modrinth_total_versions(version=version)
+        df.at[version, "Version Total"] = total_version
 
-    df.loc["Modloader Total"] = df.sum(numeric_only=True)
-    df.loc[:, "Version Total"] = df.sum(numeric_only=True, axis=1)
+    for loader in LOADERS:
+        total_loader = fetch_modrinth_total_loaders(loader=loader)
+        df.at["Modloader Total", loader] = total_loader
 
     pd.set_option("display.max_columns", None)
     pd.set_option("display.max_rows", None)
