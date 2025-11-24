@@ -177,6 +177,8 @@ if __name__ == "__main__":
         for loader in LOADERS:
             total_mods = fetch_modrinth_mods(version=version, category=loader)
             df.at[version, loader] = total_mods
+
+    for version in VERSIONS:
         total_version = fetch_modrinth_total_versions(version=version)
         df.at[version, "Version Total"] = total_version
 
