@@ -168,7 +168,7 @@ def fetch_modrinth_total_loaders(loader="fabric", limit=1) -> int:
 
 
 if __name__ == "__main__":
-    columns = ["Version"]
+    columns = []
     columns.extend(LOADERS)
     columns.extend(["Version Total"])
     df = pd.DataFrame(columns=columns)
