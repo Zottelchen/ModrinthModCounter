@@ -205,6 +205,8 @@ if __name__ == "__main__":
         total_loader = fetch_modrinth_total_loaders(loader=loader)
         df.at["Modloader Total", loader] = total_loader
 
+    df = df.sort_values(df.last_valid_index(), ascending=False, axis=1)
+
     pd.set_option("display.max_columns", None)
     pd.set_option("display.max_rows", None)
     pd.set_option("display.width", None)
