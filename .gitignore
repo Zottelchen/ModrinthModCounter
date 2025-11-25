@@ -12,5 +12,5 @@ wheels/
 #
 index.html
 table.html
-output/
+debug-output/
 api_cache.sqlite

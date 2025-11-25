@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 import pandas as pd
@@ -111,6 +112,10 @@ VERSIONS = [
 requests_cache.install_cache("api_cache", expire_after=3600 * 23)  # Cache expires after 23 hours
 cm = sns.light_palette("green", as_cmap=True)
 
+output = "debug-output"
+if sys.argv and len(sys.argv) > 1:
+    output = "output"
+
 
 @sleep_and_retry
 @limits(calls=250, period=60)
@@ -198,13 +203,16 @@ if __name__ == "__main__":
     # styled = styled.highlight_min(axis=1, props="color:white; font-weight:bold; background-color:#C25964;", subset=LOADERS)
     styled = styled.text_gradient(cmap=cm, axis=1, subset=LOADERS)
 
-    os.makedirs("output", exist_ok=True)
+    os.makedirs(output, exist_ok=True)
     with open("template.html", "r") as template_file:
         template_content = template_file.read()
-    with open("output/index.html", "w") as output_file:
+    with open(f"{output}/index.html", "w") as output_file:
         output_content = template_content.replace("<!--REPLACE_CONTENT-->", styled.to_html())
         from datetime import datetime
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
         output_content = output_content.replace("<!--REPLACE_TIME-->", current_time)
         output_file.write(output_content)
+
+    df.to_csv(f"{output}/modrinth_mod_counts.csv")
+    print("Output written to output/index.html and output/modrinth_mod_counts.csv")

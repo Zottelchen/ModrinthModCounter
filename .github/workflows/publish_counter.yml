@@ -49,7 +49,7 @@ jobs:
       - name: Sync dependencies
         run: rye sync
       - name: Run Modrinth Mod Counter
-        run: rye run python counter.py
+        run: rye run python counter.py action
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
@@ -60,3 +60,9 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output
+          git commit -m "update output"
+          git push
