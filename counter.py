@@ -14,7 +14,7 @@ LOADERS = [
     "rift",
     "ornithe",
     "neoforge",
-    "modloader",
+    #    "modloader",
     "quilt",
     #    "babric",
     #    "bta-babric",
