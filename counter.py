@@ -8,7 +8,21 @@ import requests_cache
 import seaborn as sns
 from ratelimit import limits, sleep_and_retry
 
-LOADERS = ["fabric", "rift", "ornithe", "neoforge", "modloader", "forge", "quilt", "babric", "bta-babric", "java-agent", "legacy-fabric", "liteloader", "nilloader"]
+LOADERS = [
+    "fabric",
+    "forge",
+    "rift",
+    "ornithe",
+    "neoforge",
+    "modloader",
+    "quilt",
+    #    "babric",
+    #    "bta-babric",
+    #    "java-agent",
+    #    "legacy-fabric",
+    "liteloader",
+    #    "nilloader",
+]
 VERSIONS = [
     "1.21.10",
     "1.21.9",
